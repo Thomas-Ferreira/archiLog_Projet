@@ -43,11 +43,12 @@ namespace Archi.Library.Controllers
         }
 
         // GET: api/[Controller]
-        /*[HttpGet("{sort}")]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetByOrder(string sort)
+        [HttpGet("sortby")]
+        public async Task<ActionResult<IEnumerable<TModel>>> GetByOrder(TModel model, string desc )
         {
-            return await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync();
-        }*/
+            var controller = await _context.Set<TModel>().OrderByDescending(model => model.ID).Where(x => x.Active == true).ToListAsync();
+            return controller;
+        }
 
         // POST: api/[Controller]
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
