@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace Archi.Library.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/{version:apiVersion}/[controller]")]
     [ApiController]
     public class BaseController<Tcontext, TModel> : ControllerBase where Tcontext : BaseDbContext where TModel : BaseModel 
     {
@@ -40,6 +41,13 @@ namespace Archi.Library.Controllers
 
             return controller;
         }
+
+        // GET: api/[Controller]
+        /*[HttpGet("{sort}")]
+        public async Task<ActionResult<IEnumerable<TModel>>> GetByOrder(string sort)
+        {
+            return await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync();
+        }*/
 
         // POST: api/[Controller]
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
