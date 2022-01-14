@@ -101,19 +101,19 @@ namespace Archi.Library.Controllers
             return controller;
         }
 
-        // FILTER: api/Controllers/5
-        public async Task<IActionResult> Index(string searchString)
+        // FILTER: api/[Controllers]/filter
+        public async Task<IActionResult<TModel>> Index(string searchString)
         {
             ViewData["CurrentFilter"] = searchString;
 
-            var students = from s in _context.Students
+            var controller = from s in _context.Model
                            select s;
             if (!String.IsNullOrEmpty(searchString))
             {
-                students = students.Where(s => s.LastName.Contains(searchString)
+                model = model.Where(s => s.LastName.Contains(searchString)
                                        || s.FirstMidName.Contains(searchString));
             }
-            return View(await students.AsNoTracking().ToListAsync());
+            return View(await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync());
             //return await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync();
         }
 
