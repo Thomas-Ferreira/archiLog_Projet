@@ -124,22 +124,26 @@ namespace Archi.Library.Controllers
         {
             if (param.HasOrderby())
             {
-                string champAsc = param.Asc;
-                string champDesc = param.Desc;
-                var parameter = Expression.Parameter(typeof(TModel), "x");
-                var property = Expression.Property(parameter, champDesc);
-                var o = Expression.Convert(property, typeof(object));
-                var lambda = Expression.Lambda<Func<TModel, object>>(o, parameter);
+                string champAsc = param.asc;
+                string champDesc = param.desc;
+                
+                var lambda = CreateLambda(champDesc);
 
-                var parameter2 = Expression.Parameter(typeof(TModel), "x2");
-                var property2 = Expression.Property(parameter2, champAsc);
-                var o2 = Expression.Convert(property2, typeof(object));
-                var lambda2 = Expression.Lambda<Func<TModel, object>>(o2, parameter2);
+                var lambda2 = CreateLambda(champAsc);
 
                 return query.OrderByDescending(lambda).ThenBy(lambda2);
             }
             else
                 return (IOrderedQueryable<TModel>)query;
+        }
+
+        private Expression<Func<TModel, object>> CreateLambda(string champ)
+        {
+            var parameter = Expression.Parameter(typeof(TModel), "x");
+            var property = Expression.Property(parameter, champ);
+            var o = Expression.Convert(property, typeof(object));
+            var lambda = Expression.Lambda<Func<TModel, object>>(o, parameter);
+            return lambda;
         }
 
     }
