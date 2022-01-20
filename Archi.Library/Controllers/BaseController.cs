@@ -1,10 +1,12 @@
 ﻿using Archi.Library.Data;
+using Archi.Library.Extensions;
 using Archi.Library.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +14,7 @@ namespace Archi.Library.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BaseController<Tcontext, TModel> : ControllerBase where Tcontext : BaseDbContext where TModel : BaseModel 
+    public class BaseController<Tcontext, TModel> : ControllerBase where Tcontext : BaseDbContext where TModel : BaseModel
     {
         protected readonly Tcontext _context;
         public BaseController(Tcontext context)
@@ -22,8 +24,19 @@ namespace Archi.Library.Controllers
 
         // GET: api/[Controller]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetAll()
+        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery] Filtre filtre)
         {
+            var tmodelfiltre = from s in _context.Set<TModel>()
+                           select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                tmodelfiltre = tmodelfiltre.Where(s => s.GetType().GetProperty('Reine'));
+            }
+
+            //var result2 = _context.Set<TModel>().Where(x => x.Active == true);
+            //QueryExtensions.Sort(result2, param);
+            //result2.Sort(filtre);
+            //return await result2.ToListAsync();
             return await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync();
         }
 
@@ -100,23 +113,6 @@ namespace Archi.Library.Controllers
 
             return controller;
         }
-
-        // FILTER: api/[Controllers]/filter
-        public async Task<IActionResult<TModel>> Index(string searchString)
-        {
-            ViewData["CurrentFilter"] = searchString;
-
-            var controller = from s in _context.Model
-                           select s;
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                model = model.Where(s => s.LastName.Contains(searchString)
-                                       || s.FirstMidName.Contains(searchString));
-            }
-            return View(await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync());
-            //return await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync();
-        }
-
 
         private bool ModelExists(int id)
         {
