@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Archi.Library.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/{version:apiVersion}/[controller]")]
     [ApiController]
     public class BaseController<Tcontext, TModel> : ControllerBase where Tcontext : BaseDbContext where TModel : BaseModel 
     {
@@ -22,9 +24,13 @@ namespace Archi.Library.Controllers
 
         // GET: api/[Controller]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetAll()
+        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Params param)
         {
-            return await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync();
+            var query = _context.Set<TModel>().Where(x => x.Active == true);
+            var result = Sort(query, param);
+
+            return await result.ToListAsync();
+
         }
 
         // GET: api/[Controller]/5
@@ -40,6 +46,14 @@ namespace Archi.Library.Controllers
 
             return controller;
         }
+
+        // GET: api/[Controller]
+        /*[HttpGet("sortby")]
+        public async Task<ActionResult<IEnumerable<TModel>>> GetByOrder( string desc )
+        {
+            var controller = await _context.Set<TModel>().OrderByDescending(x => x.GetType().GetProperty(desc)).Where(x => x.Active == true).ToListAsync();
+            return controller;
+        }*/
 
         // POST: api/[Controller]
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
@@ -105,5 +119,32 @@ namespace Archi.Library.Controllers
         {
             return _context.Set<TModel>().Any(e => e.ID == id);
         }
+
+        protected IOrderedQueryable<TModel> Sort(IQueryable<TModel> query, Params param)
+        {
+            if (param.HasOrderby())
+            {
+                string champAsc = param.asc;
+                string champDesc = param.desc;
+                
+                var lambda = CreateLambda(champDesc);
+
+                var lambda2 = CreateLambda(champAsc);
+
+                return query.OrderByDescending(lambda).ThenBy(lambda2);
+            }
+            else
+                return (IOrderedQueryable<TModel>)query;
+        }
+
+        private Expression<Func<TModel, object>> CreateLambda(string champ)
+        {
+            var parameter = Expression.Parameter(typeof(TModel), "x");
+            var property = Expression.Property(parameter, champ);
+            var o = Expression.Convert(property, typeof(object));
+            var lambda = Expression.Lambda<Func<TModel, object>>(o, parameter);
+            return lambda;
+        }
+
     }
 }
