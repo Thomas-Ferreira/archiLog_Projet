@@ -47,14 +47,6 @@ namespace Archi.Library.Controllers
             return controller;
         }
 
-        // GET: api/[Controller]
-        /*[HttpGet("sortby")]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetByOrder( string desc )
-        {
-            var controller = await _context.Set<TModel>().OrderByDescending(x => x.GetType().GetProperty(desc)).Where(x => x.Active == true).ToListAsync();
-            return controller;
-        }*/
-
         // POST: api/[Controller]
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
