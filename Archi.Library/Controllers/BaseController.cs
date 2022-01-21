@@ -1,5 +1,6 @@
 ﻿using Archi.Library.Data;
 using Archi.Library.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -27,7 +28,7 @@ namespace Archi.Library.Controllers
         public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Params param)
         {
             var query = _context.Set<TModel>().Where(x => x.Active == true);
-            var result = Sort(query, param);
+            var result = Sort(query, param, Request.QueryString);
 
             return await result.ToListAsync();
 
@@ -112,18 +113,53 @@ namespace Archi.Library.Controllers
             return _context.Set<TModel>().Any(e => e.ID == id);
         }
 
-        protected IOrderedQueryable<TModel> Sort(IQueryable<TModel> query, Params param)
+        protected IOrderedQueryable<TModel> Sort(IQueryable<TModel> query, Params param, QueryString queryString)
         {
             if (param.HasOrderby())
             {
-                string champAsc = param.asc;
-                string champDesc = param.desc;
-                
-                var lambda = CreateLambda(champDesc);
+                string champAsc = param.Asc;
+                string champDesc = param.Desc;
 
-                var lambda2 = CreateLambda(champAsc);
+                bool test = param.isAsc(queryString);
 
-                return query.OrderByDescending(lambda).ThenBy(lambda2);
+                if (param.isAsc(queryString))
+                {
+                    if (string.IsNullOrWhiteSpace(champDesc))
+                    {
+                        var lambda = CreateLambda(champAsc);
+                        return query.OrderBy(lambda);
+                    }
+                    else
+                    {
+                        var lambda = CreateLambda(champAsc);
+
+                        var lambda2 = CreateLambda(champDesc);
+
+                        return query.OrderBy(lambda).ThenByDescending(lambda2);
+                    }
+
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(champAsc))
+                    {
+                        var lambda = CreateLambda(champDesc);
+                        return query.OrderByDescending(lambda);
+                    }
+                    else
+                    {
+                        var lambda = CreateLambda(champDesc);
+
+                        var lambda2 = CreateLambda(champAsc);
+
+                        return query.OrderByDescending(lambda).ThenBy(lambda2);
+                    }
+                }
+
+                //string[] queryOrderby = param.ToString().Split(',');
+
+                //foreach () { }
+                    
             }
             else
                 return (IOrderedQueryable<TModel>)query;

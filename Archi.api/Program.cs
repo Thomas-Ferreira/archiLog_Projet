@@ -15,10 +15,14 @@ namespace Archi.api
     {
         public static int Main(string[] args)
         {
+            var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.Development.json")
+            .Build();
+
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
-                .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
+                .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
             try
