@@ -1,5 +1,6 @@
 ﻿using Archi.Library.Data;
 using Archi.Library.Models;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,101 +10,126 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Archi.Library.Controllers
-{
+{   
+     // BaseController à comme type TContext, TModel et TPaging. Nous avons ControllerBase par le type TContext et BaseDbContext par TModel qui héritent de BaseModel
+
     [Route("api/[controller]")]
     [ApiController]
-    public class BaseController<Tcontext, TModel> : ControllerBase where Tcontext : BaseDbContext where TModel : BaseModel 
+    public abstract class BaseController<TContext, TModel> : ControllerBase where TContext : BaseDbContext where TModel : BaseModel
+
     {
-        protected readonly Tcontext _context;
-        public BaseController(Tcontext context)
+        protected readonly TContext _context;
+
+        public BaseController(TContext context)
         {
             _context = context;
         }
 
+        
         // GET: api/[Controller]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetAll()
+        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Settings setting)
         {
-            return await _context.Set<TModel>().Where(x => x.Active == true).ToListAsync();
+            var query = _context.Set<TModel>()
+                                  .Where(x => x.Active == true);
+                                  
+            if (setting.HasRange())
+            {
+                var tab = setting.Range.Split('-');
+                var pagin = new PaginatedList<TModel>(query, int.Parse(tab[0]), int.Parse(tab[1]));
+                query = await pagin.PagineAsync();
+          
+            }
+          /*  Paging = new
+            {
+                First = .FirstPage,
+                Previous = .PreviousPage,
+                Next = .NextPage,
+                Last = .LastPage
+            }
+          */
+
+            return await query.ToListAsync() ;
         }
 
-        // GET: api/[Controller]/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TModel>> GetById(int id)
-        {
-            var controller = await _context.Set<TModel>().SingleOrDefaultAsync(x => x.ID==id && x.Active);
+    // GET: api/[Controller]/5
+    [HttpGet("{id}")]
+    public async Task<ActionResult<TModel>> GetById(int id)
+    {
+    var controller = await _context.Set<TModel>().SingleOrDefaultAsync(x => x.ID==id && x.Active);
 
-            if (controller == null)
+    if (controller == null)
+    {
+        return NotFound();
+    }
+
+    return controller;
+    }
+
+    // POST: api/[Controller]
+    // To protect from overposting attacks, enable the specific properties you want to bind to, for
+    // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+    [HttpPost]
+    public async Task<ActionResult<TModel>> PostController(TModel model)
+    {
+        _context.Set<TModel>().Add(model);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction("GetById", new { id = model.ID }, model);
+    }
+
+    // PUT: api/Controllers/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to, for
+    // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutController(int id, TModel model)
+    {
+        if (id != model.ID)
+        {
+            return BadRequest();
+        }
+
+        _context.Entry(model).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ModelExists(id))
             {
                 return NotFound();
             }
-
-            return controller;
-        }
-
-        // POST: api/[Controller]
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<TModel>> PostController(TModel model)
-        {
-            _context.Set<TModel>().Add(model);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetById", new { id = model.ID }, model);
-        }
-
-        // PUT: api/Controllers/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutController(int id, TModel model)
-        {
-            if (id != model.ID)
+            else
             {
-                return BadRequest();
+                throw;
             }
-
-            _context.Entry(model).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ModelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
-        // DELETE: api/Controllers/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<TModel>> DeleteCustomer(int id)
+        return NoContent();
+    }
+
+    // DELETE: api/Controllers/5
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<TModel>> DeleteCustomer(int id)
+    {
+        var controller = await _context.Set<TModel>().FindAsync(id);
+        if (controller == null)
         {
-            var controller = await _context.Set<TModel>().FindAsync(id);
-            if (controller == null)
-            {
-                return NotFound();
-            }
-
-            _context.Entry(controller).State = EntityState.Deleted;
-            await _context.SaveChangesAsync();
-
-            return controller;
+            return NotFound();
         }
 
-        private bool ModelExists(int id)
-        {
-            return _context.Set<TModel>().Any(e => e.ID == id);
-        }
+        _context.Entry(controller).State = EntityState.Deleted;
+        await _context.SaveChangesAsync();
+
+        return controller;
+    }
+
+    private bool ModelExists(int id)
+    {
+        return _context.Set<TModel>().Any(e => e.ID == id);
+    }
     }
 }
