@@ -1,13 +1,11 @@
 ﻿using Archi.Library.Data;
-using Archi.Library.Extensions;
 using Archi.Library.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Archi.Library.Controllers
@@ -24,13 +22,18 @@ namespace Archi.Library.Controllers
 
         // GET: api/[Controller]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery] Filtre filtre)
+        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Settings setting, string searchString)
         {
-            var tmodelfiltre = from s in _context.Set<TModel>()
+            var TModelFilter = from s in _context.Set<TModel>()
                            select s;
-            if (!String.IsNullOrEmpty(searchString))
+
+            if (setting.HasFilter(searchString))
             {
-                tmodelfiltre = tmodelfiltre.Where(s => s.GetType().GetProperty('Reine'));
+                TModelFilter = TModelFilter.Where(s => s.Name.Contains(searchString)
+                               || s.Rating.Contains(searchString));
+
+                //.OrderBy(x => x.GetType().GetProperty("name"));
+                //OrderBy(s => s.GetType().GetProperty(searchString));
             }
 
             //var result2 = _context.Set<TModel>().Where(x => x.Active == true);
@@ -117,6 +120,32 @@ namespace Archi.Library.Controllers
         private bool ModelExists(int id)
         {
             return _context.Set<TModel>().Any(e => e.ID == id);
+        }
+
+        protected IOrderedQueryable<TModel> Sort(IQueryable<TModel> query, Settings setting)
+        {
+            if (setting.HasOrder())
+            {
+                string champAsc = setting.asc;
+                string champDesc = setting.desc;
+
+                var lambda = CreateLambda(champDesc);
+
+                var lambda2 = CreateLambda(champAsc);
+
+                return query.OrderByDescending(lambda).ThenBy(lambda2);
+            }
+            else
+                return (IOrderedQueryable<TModel>)query;
+        }
+
+        private Expression<Func<TModel, object>> CreateLambda(string champ)
+        {
+            var parameter = Expression.Parameter(typeof(TModel), "x");
+            var property = Expression.Property(parameter, champ);
+            var o = Expression.Convert(property, typeof(object));
+            var lambda = Expression.Lambda<Func<TModel, object>>(o, parameter);
+            return lambda;
         }
     }
 }

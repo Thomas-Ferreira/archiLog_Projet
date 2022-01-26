@@ -4,31 +4,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Archi.Library.Extensions
+namespace Archi.api.Extensions
 {
+
     public static class QueryExtensions
     {
-        public static IOrderedQueryable<TModel> Sort<TModel>(this IQueryable<TModel> query, Filtre filtre)
+        public static void Sort<TModel>(this IQueryable<TModel> query, Settings setting)
         {
-            if (filtre.HasOrder())
+            if (setting.HasOrder())
             {
-                string champ = filtre.Asc;
-                //var property = typeof(TModel).GetProperty(champ, System.Reflection.BindingFlags.IgnoreCase | System.Reflection.BindingFlags.Instance);
-                //query = query.OrderBy(x => property.GetValue(x));
-
-                //Créer lambda
-                var parameter = Expression.Parameter(typeof(TModel), "x");
-                var property = Expression.Property(parameter, "Lastname");
-                var o = Expression.Convert(property, typeof(object));
-                var lambda = Expression.Lambda<Func<TModel, object>>(o, parameter);
-
-                //Utiliser
-                return query.OrderBy(lambda);
-
+                string champ = setting.Asc;
+                query = query.OrderBy(x => x.GetType().GetProperty(champ, System.Reflection.BindingFlags.IgnoreCase | System.Reflection.BindingFlags.Instance));
             }
-            else
-                return (IOrderedQueryable<TModel>)query;
         }
     }
 }

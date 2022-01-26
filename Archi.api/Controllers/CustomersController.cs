@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Archi.api.Data;
 using Archi.api.Models;
 using Archi.Library.Controllers;
+using Archi.Library.Models;
 
 namespace Archi.api.Controllers
 {
@@ -17,6 +18,9 @@ namespace Archi.api.Controllers
         {
         }
 
-
+        public Task TestGetAll(Settings settings)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
