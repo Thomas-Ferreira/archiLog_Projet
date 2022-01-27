@@ -1,17 +1,19 @@
 ﻿using Archi.Library.Data;
 using Archi.Library.Models;
-
+using iTextSharp.text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Archi.Library.Controllers
 {   
-     // BaseController à comme type TContext, TModel et TPaging. Nous avons ControllerBase par le type TContext et BaseDbContext par TModel qui héritent de BaseModel
+     
 
     [Route("api/[controller]")]
     [ApiController]
@@ -19,6 +21,8 @@ namespace Archi.Library.Controllers
 
     {
         protected readonly TContext _context;
+
+        public IFormatProvider LinkHeaderTemplate { get; private set; }
 
         public BaseController(TContext context)
         {
@@ -32,28 +36,24 @@ namespace Archi.Library.Controllers
         {
             var query = _context.Set<TModel>()
                                   .Where(x => x.Active == true);
-                                  
+
+           // this.Response.Headers.Add("Accepted Range", "12");
+
             if (setting.HasRange())
             {
                 var tab = setting.Range.Split('-');
+                var rel = setting.Rel;
+              
                 var pagin = new PaginatedList<TModel>(query, int.Parse(tab[0]), int.Parse(tab[1]));
                 query = await pagin.PagineAsync();
-          
+                int total = _context.Set<TModel>().Count();
             }
-          /*  Paging = new
-            {
-                First = .FirstPage,
-                Previous = .PreviousPage,
-                Next = .NextPage,
-                Last = .LastPage
-            }
-          */
 
             return await query.ToListAsync() ;
         }
 
-    // GET: api/[Controller]/5
-    [HttpGet("{id}")]
+        // GET: api/[Controller]/5
+        [HttpGet("{id}")]
     public async Task<ActionResult<TModel>> GetById(int id)
     {
     var controller = await _context.Set<TModel>().SingleOrDefaultAsync(x => x.ID==id && x.Active);

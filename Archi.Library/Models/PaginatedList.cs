@@ -3,27 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.Routing;
 
-public class PaginatedList<T>
+public class PaginatedList<TPagin>
 {
     private int _pageIndex;
     public int TotalPages { get; set; }
-    const int maxPageSize = 2; 
+    //const int maxPageSize = 3; 
     private int _pageSize;
-    private readonly IQueryable<T> _items;
-  
+    private readonly IQueryable<TPagin> _items;
 
-    public PaginatedList(IQueryable<T> items, int pageIndex, int pageSize)
+
+    public PaginatedList(IQueryable<TPagin> items, int pageIndex, int pageSize)
     {
         _pageIndex = pageIndex;
         _pageSize = pageSize;
         _items = items;
     }
+
     public bool HasPreviousPage
     {
         get
         {
-            return ( _pageIndex > 1);
+            return (_pageIndex > 1);
         }
     }
 
@@ -31,23 +33,20 @@ public class PaginatedList<T>
     {
         get
         {
-            return ( _pageIndex < TotalPages);
+            return (_pageIndex < TotalPages);
         }
     }
-    
+
+
     public int PageSize
     {
         get
         {
             return _pageSize;
         }
-        set
-        {
-            _pageSize = ( _pageIndex > maxPageSize) ? maxPageSize : _pageIndex;
-        }
     }
 
-    public async Task<IQueryable<T>> PagineAsync()
+    public async Task<IQueryable<TPagin>> PagineAsync()
     {
         var count = await _items.CountAsync();
         TotalPages = (int)Math.Ceiling(count / (double)_pageSize);
@@ -55,4 +54,3 @@ public class PaginatedList<T>
                      .Take(_pageSize);
     }
 }
-

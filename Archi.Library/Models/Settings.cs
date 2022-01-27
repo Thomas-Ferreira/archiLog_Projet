@@ -10,6 +10,8 @@ namespace Archi.Library.Models
         public string Asc { get; set; }
         public string Desc { get; set; }
         public string Range { get; set; }
+        public string Rel { get; set; }
+
         public bool HasOrder()
         {
             return !string.IsNullOrWhiteSpace(Asc) || !string.IsNullOrWhiteSpace(Desc);
@@ -18,6 +20,10 @@ namespace Archi.Library.Models
         {
             return !string.IsNullOrWhiteSpace(Range);
         }
-
+        public bool HasRel()
+        {
+            return !string.IsNullOrWhiteSpace(Rel);
+        }
+     
     }
 }
