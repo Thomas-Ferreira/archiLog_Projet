@@ -15,7 +15,7 @@ namespace Archi.api.Extensions
         {
             if (setting.HasOrder())
             {
-                string champ = setting.Asc;
+                string champ = setting.asc;
                 query = query.OrderBy(x => x.GetType().GetProperty(champ, System.Reflection.BindingFlags.IgnoreCase | System.Reflection.BindingFlags.Instance));
             }
         }

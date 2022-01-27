@@ -14,7 +14,7 @@ namespace Archi.api.Controllers
 {
     public class CustomersController : BaseController<ArchiDbContext, Customer>
     {
-        public CustomersController(ArchiDbContext context):base(context)
+        public CustomersController(ArchiDbContext context) : base(context)
         {
         }
 

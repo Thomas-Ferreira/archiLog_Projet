@@ -1,5 +1,6 @@
 ﻿using Archi.api.Data;
 using Archi.api.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Archi.Library.Test.data
         }
         public static MockDbContext GetDbContext(bool withData = true)
         {
-            var option = new DbContextOptionsBuilder().UseInMemoryDatabase("dbtest").Options;
+            var options = new DbContextOptionsBuilder().UseInMemoryDatabase("dbtest").Options;
             var db = new MockDbContext(options);
 
             if(withData)

@@ -1,7 +1,9 @@
 ﻿using Archi.Library.Data;
 using Archi.Library.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,22 +22,33 @@ namespace Archi.Library.Controllers
             _context = context;
         }
 
+
+        public LogFilter(Tcontext _context, ILogger<LogFilter> logger)
+        {
+            this._logger = logger;
+            this._context = _context;
+        }
+
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
+            string msg = $"[OnActionExecuted] Request for {this._context.ToString()}";
+            this._logger.LogInformation(msg);
+        }
+
+        public void OnActionExecuting(ActionExecutingContext context)
+        {
+            string msg = $"[OnActionExecuting] Request for {this._context.ToString()}";
+            this._logger.LogInformation(msg);
+        }
+
+
         // GET: api/[Controller]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Settings setting, string searchString)
+        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Settings setting)
         {
-            var TModelFilter = from s in _context.Set<TModel>()
-                           select s;
 
-            if (setting.HasFilter(searchString))
-            {
-                TModelFilter = TModelFilter.Where(s => s.Name.Contains(searchString)
-                               || s.Rating.Contains(searchString));
-
-                //.OrderBy(x => x.GetType().GetProperty("name"));
-                //OrderBy(s => s.GetType().GetProperty(searchString));
-            }
-
+            //.OrderBy(x => x.GetType().GetProperty("name"));
+            //OrderBy(s => s.GetType().GetProperty(searchString));
             //var result2 = _context.Set<TModel>().Where(x => x.Active == true);
             //QueryExtensions.Sort(result2, param);
             //result2.Sort(filtre);
