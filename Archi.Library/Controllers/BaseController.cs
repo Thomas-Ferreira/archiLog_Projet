@@ -119,11 +119,12 @@ namespace Archi.Library.Controllers
             {
                 string champAsc = param.Asc;
                 string champDesc = param.Desc;
-
-                bool test = param.isAsc(queryString);
+                string[] queryOrderbyAsc = champAsc.ToString().Split(',');
+                string[] queryOrderbyDesc = champDesc.ToString().Split(',');
 
                 if (param.isAsc(queryString))
                 {
+                    
                     if (string.IsNullOrWhiteSpace(champDesc))
                     {
                         var lambda = CreateLambda(champAsc);
@@ -137,7 +138,6 @@ namespace Archi.Library.Controllers
 
                         return query.OrderBy(lambda).ThenByDescending(lambda2);
                     }
-
                 }
                 else
                 {
@@ -154,12 +154,7 @@ namespace Archi.Library.Controllers
 
                         return query.OrderByDescending(lambda).ThenBy(lambda2);
                     }
-                }
-
-                //string[] queryOrderby = param.ToString().Split(',');
-
-                //foreach () { }
-                    
+                }    
             }
             else
                 return (IOrderedQueryable<TModel>)query;
