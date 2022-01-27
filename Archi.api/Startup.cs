@@ -12,10 +12,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Archi.api.Data;
 using Microsoft.EntityFrameworkCore;
+using Archi.Library.Core;
 
 namespace Archi.api
 {
-    public class Startup
+    public class Startup : BaseStartup
     {
         public Startup(IConfiguration configuration)
         {

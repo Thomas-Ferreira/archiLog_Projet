@@ -14,10 +14,11 @@ namespace Archi.Library.Controllers
     [ApiVersion("1.0")]
     [Route("api/{version:apiVersion}/[controller]")]
     [ApiController]
-    public class BaseController<Tcontext, TModel> : ControllerBase where Tcontext : BaseDbContext where TModel : BaseModel 
+    public class BaseController<TContext, TModel> : ControllerBase where TContext : BaseDbContext where TModel : BaseModel 
     {
-        protected readonly Tcontext _context;
-        public BaseController(Tcontext context)
+        protected readonly TContext _context;
+
+        public BaseController(TContext context)
         {
             _context = context;
         }

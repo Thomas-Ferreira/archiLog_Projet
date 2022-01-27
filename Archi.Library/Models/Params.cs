@@ -8,6 +8,7 @@ namespace Archi.Library.Models
     {
         public string asc { get; set; }
         public string desc { get; set; }
+
         public bool HasOrderby()
         {
             return !string.IsNullOrWhiteSpace(asc) || !string.IsNullOrWhiteSpace(desc);
