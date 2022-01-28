@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 
 namespace Archi.Library.Controllers
-
+{ 
     [ApiVersion("1.0")]
     [Route("api/{version:apiVersion}/[controller]")]
     [ApiController]
