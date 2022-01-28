@@ -26,12 +26,12 @@ namespace Archi.Library.Token
             // some payload that contain information about the customer
             var payload = new JwtPayload
             {
-                {"sub", "ArchilogSubject" },
-                {"Name", "Steven" },
-                {"email", "steven.azark@outlook.fr" },
+                {"sub", "archilog" },
+                {"Name", "julien" },
+                {"email", "julien.angelica@gmail.com" },
                 {"exp", ts},
-                {"iss", "https://localhost:44313" }, // Issuer : the party generating the JWT token
-                {"aud", "https://localhost:44313" } // AUdience : the adress of the ressource 
+                {"iss", "https://localhost:5188" }, // Issuer : the party generating the JWT token
+                {"aud", "https://localhost:5188" } // AUdience : the adress of the ressource 
             };
 
             var secToken = new JwtSecurityToken(header, payload);
