@@ -10,16 +10,13 @@ namespace Archi.Library.Token
        [Route("connect")] 
         public ActionResult<string> Connect(string login, string password)
         {
-            if (password == "archilog")
+            if (password == "Tokinizer")
             {
                 return new ObjectResult(JwtToken.GenerateJwtToken());
             }
             else
             {
-
-            }
-            {
-                return BadRequest("compte invalide");
+                return BadRequest("eugneugneu mauvais mot de passe");
             }
         }
     }
