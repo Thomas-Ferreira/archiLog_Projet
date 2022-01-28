@@ -69,23 +69,18 @@ namespace Archi.Library.Controllers
         [HttpGet("search")]
             public async Task<ActionResult<IEnumerable<TModel>>> SearchingName()
             {
-
-                // on récupère la clé de notre paramètre
                 var Propertykey = Request.Query.First().Key;
-                // on récupère la valeur de notre proprité
                 var valueProperty = Request.Query.First().Value.ToString();
 
-                // creation de notre expression Lambda 
                 var parameter = Expression.Parameter(typeof(TModel), "x");
                 var property = Expression.Property(parameter, Propertykey);
                 var constanteProperty = Expression.Constant(valueProperty, typeof(string));
                 BinaryExpression binaryExpression = Expression.Equal(property, constanteProperty);
                 var Lambda = Expression.Lambda<Func<TModel, bool>>(binaryExpression, parameter);
 
-                // resultat retouné 
                 var result = await _context.Set<TModel>().Where(Lambda).ToListAsync();
                 return result;
-        }
+            }
 
 
         // POST: api/[Controller]
