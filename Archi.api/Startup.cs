@@ -1,15 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Archi.api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,9 +15,6 @@ namespace Archi.api
 {
     public class Startup
     {
-       // public static string SECRET_KEY = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        //public static readonly SymmetricSecurityKey SIGNING_KEY = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SECRET_KEY));
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -41,23 +32,28 @@ namespace Archi.api
             {
                 jwtOptions.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    // the Signing Key is defined in the TokenController class
-
-                    // signing key is like a secure password...
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtToken.SECRET_KEY)),
+                    // Validez le serveur qui génère le token
                     ValidateIssuer = false,
+                    // Valider pour le destinataire du token sois autorisé à recevoir le token
                     ValidateAudience = false,
+                    // Expiration du token
+                    ValidateLifetime = true,
+                    // Spécifications des valeurs pour l'émetteur
                     ValidIssuer = "https://localhost:44306",
+                    // Spécifications des valeurs pour l'audience
                     ValidAudience = "https://localhost:44306",
-                    ValidateLifetime = true
+                    // Spécifications des valeurs pourclee de connexion
+                    // La clee de connexion est définis depuis la classe TokenController
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtToken.SECRET_KEY))
+
                 };
             });
-
+            // services 
             services.AddDbContext<ArchiDbContext>(options =>
-            {
+            { // clee de connexion
                 options.UseSqlServer(Configuration.GetConnectionString("Archi"));
             });
-
+            //versionning
             services.AddMvc();
             services.AddApiVersioning(o => {
                 o.ReportApiVersions = true;
@@ -77,6 +73,8 @@ namespace Archi.api
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            // Authentification + Authorisation 
             app.UseAuthentication();
             app.UseAuthorization();
             

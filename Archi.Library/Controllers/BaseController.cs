@@ -123,8 +123,8 @@ namespace Archi.Library.Controllers
         {
             if (param.HasOrderby())
             {
-                string champAsc = param.asc;
-                string champDesc = param.desc;
+                string champAsc = param.Asc;
+                string champDesc = param.Desc;
                 
                 var lambda = CreateLambda(champDesc);
 

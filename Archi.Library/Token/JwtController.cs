@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Archi.Library.Token
 {
@@ -9,7 +6,7 @@ namespace Archi.Library.Token
     //[Route("api/[Controller]")]
     public class JwtController : ControllerBase
     {
-        [HttpGet]
+       [HttpGet]
        [Route("connect")] 
         public ActionResult<string> Connect(string login, string password)
         {
