@@ -14,13 +14,15 @@ using Archi.api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Archi.Library.Token;
 
 namespace Archi.api
 {
     public class Startup
     {
-        private const string SECRET_KEY = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        public static readonly SymmetricSecurityKey SIGNING_KEY = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SECRET_KEY));
+       // public static string SECRET_KEY = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        //public static readonly SymmetricSecurityKey SIGNING_KEY = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SECRET_KEY));
 
         public Startup(IConfiguration configuration)
         {
@@ -34,23 +36,19 @@ namespace Archi.api
         {
 
             services.AddControllers();
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "JwtBearer";
-                options.DefaultChallengeScheme = "JwtBearer";
-            })
-            .AddJwtBearer("JwtBearer", jwtOptions =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(jwtOptions =>
             {
                 jwtOptions.TokenValidationParameters = new TokenValidationParameters()
                 {
                     // the Signing Key is defined in the TokenController class
 
                     // signing key is like a secure password...
-                    IssuerSigningKey = SIGNING_KEY,
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidIssuer = "https://localhost:5188",
-                    ValidAudience = "https://localhost:5188",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtToken.SECRET_KEY)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidIssuer = "https://localhost:44306",
+                    ValidAudience = "https://localhost:44306",
                     ValidateLifetime = true
                 };
             });
@@ -79,8 +77,9 @@ namespace Archi.api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
+            
 
             app.UseEndpoints(endpoints =>
             {
