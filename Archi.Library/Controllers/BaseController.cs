@@ -190,7 +190,7 @@ namespace Archi.Library.Controllers
                         return resultquery;
                     }
                 }
-                else /*if (param.isAsc(queryString) == false)*/
+                else
                 {
                     var lambda = CreateLambda<TModel>(queryOrderbyDesc.FirstOrDefault());
                     var resultquery = query.OrderByDescending(lambda);
