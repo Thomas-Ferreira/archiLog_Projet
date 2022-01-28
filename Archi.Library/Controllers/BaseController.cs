@@ -1,7 +1,9 @@
 ﻿using Archi.Library.Data;
 using Archi.Library.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,13 +20,15 @@ namespace Archi.Library.Controllers
     {
         protected readonly TContext _context;
 
-        public BaseController(TContext context)
+        public BaseController(TContext context, IConfiguration config)
         {
             _context = context;
+          
         }
 
         // GET: api/[Controller]
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Params param)
         {
             var query = _context.Set<TModel>().Where(x => x.Active == true);
@@ -48,14 +52,6 @@ namespace Archi.Library.Controllers
             return controller;
         }
 
-        // GET: api/[Controller]
-        /*[HttpGet("sortby")]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetByOrder( string desc )
-        {
-            var controller = await _context.Set<TModel>().OrderByDescending(x => x.GetType().GetProperty(desc)).Where(x => x.Active == true).ToListAsync();
-            return controller;
-        }*/
-
         // POST: api/[Controller]
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -67,11 +63,13 @@ namespace Archi.Library.Controllers
 
             return CreatedAtAction("GetById", new { id = model.ID }, model);
         }
+     
+ 
 
-        // PUT: api/Controllers/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
+            // PUT: api/Controllers/5
+            // To protect from overposting attacks, enable the specific properties you want to bind to, for
+            // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+            [HttpPut("{id}")]
         public async Task<IActionResult> PutController(int id, TModel model)
         {
             if (id != model.ID)

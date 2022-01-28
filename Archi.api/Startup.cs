@@ -13,11 +13,16 @@ using System.Threading.Tasks;
 using Archi.api.Data;
 using Microsoft.EntityFrameworkCore;
 using Archi.Library.Core;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Archi.api
 {
-    public class Startup : BaseStartup
+    public class Startup
     {
+        private const string SECRET_KEY = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        public static readonly SymmetricSecurityKey SIGNING_KEY = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SECRET_KEY));
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -28,7 +33,29 @@ namespace Archi.api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             services.AddControllers();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "JwtBearer";
+                options.DefaultChallengeScheme = "JwtBearer";
+            })
+            .AddJwtBearer("JwtBearer", jwtOptions =>
+            {
+                jwtOptions.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    // the Signing Key is defined in the TokenController class
+
+                    // signing key is like a secure password...
+                    IssuerSigningKey = SIGNING_KEY,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidIssuer = "https://localhost:5188",
+                    ValidAudience = "https://localhost:5188",
+                    ValidateLifetime = true
+                };
+            });
+
             services.AddDbContext<ArchiDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("Archi"));
@@ -61,5 +88,6 @@ namespace Archi.api
                 endpoints.MapControllers();
             });
         }
+    
     }
 }
