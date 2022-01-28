@@ -32,10 +32,10 @@ namespace Archi.Library.Controllers
         
         // GET: api/[Controller]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Params param, [FromQuery]Settings setting)
+        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Settings setting)
         {
             var query = _context.Set<TModel>().Where(x => x.Active == true);
-            query = Sort(query, param, Request.QueryString);
+            query = Sort(query, setting, Request.QueryString);
 
             // this.Response.Headers.Add("Accepted Range", "12");
 
@@ -149,16 +149,16 @@ namespace Archi.Library.Controllers
         return _context.Set<TModel>().Any(e => e.ID == id);
     }
     
-        protected IOrderedQueryable<TModel> Sort(IQueryable<TModel> query, Params param, QueryString queryString)
+        protected IOrderedQueryable<TModel> Sort(IQueryable<TModel> query, Settings setting, QueryString queryString)
         {
-            if (param.HasOrderby())
+            if (setting.HasOrderby())
             {
-                string champAsc = param.Asc;
-                string champDesc = param.Desc;
+                string champAsc = setting.Asc;
+                string champDesc = setting.Desc;
                 string[] queryOrderbyAsc = champAsc != null ? champAsc?.ToString().Split(',') : new string[0];
                 string[] queryOrderbyDesc = champDesc != null ? champDesc.ToString().Split(',') : new string[0];
 
-                if (param.isAsc(queryString) == true && champAsc != null)
+                if (setting.isAsc(queryString) == true && champAsc != null)
                 {
                     var lambda = CreateLambda<TModel>(queryOrderbyAsc.FirstOrDefault());
                     var resultquery = query.OrderBy(lambda);

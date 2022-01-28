@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,7 +13,7 @@ namespace Archi.Library.Models
         public string Range { get; set; }
         public string Rel { get; set; }
 
-        public bool HasOrder()
+        public bool HasOrderby()
         {
             return !string.IsNullOrWhiteSpace(Asc) || !string.IsNullOrWhiteSpace(Desc);
         }
@@ -24,6 +25,25 @@ namespace Archi.Library.Models
         {
             return !string.IsNullOrWhiteSpace(Rel);
         }
-     
+
+        public bool isAsc(QueryString queryString)
+        {
+            if (queryString.ToString().IndexOf("asc", 0) == -1)
+            {
+                return false;
+            }
+            if (queryString.ToString().IndexOf("desc", 0) == -1)
+            {
+                return true;
+            }
+            if (queryString.ToString().IndexOf("asc", 0) < queryString.ToString().IndexOf("desc", 0))
+            {
+                return true;
+            }
+
+            return false;
+
+        }
+
     }
 }
