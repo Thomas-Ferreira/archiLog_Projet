@@ -1,24 +1,24 @@
 ﻿using Archi.Library.Data;
 using Archi.Library.Models;
 using iTextSharp.text;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 
 namespace Archi.Library.Controllers
-{   
-     
 
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/{version:apiVersion}/[controller]")]
     [ApiController]
     public abstract class BaseController<TContext, TModel> : ControllerBase where TContext : BaseDbContext where TModel : BaseModel
-
     {
         protected readonly TContext _context;
 
@@ -32,11 +32,10 @@ namespace Archi.Library.Controllers
         
         // GET: api/[Controller]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Settings setting)
+        public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Params param, [FromQuery]Settings setting)
         {
-            var query = _context.Set<TModel>()
-                                  .Where(x => x.Active == true);
-
+            var query = _context.Set<TModel>().Where(x => x.Active == true);
+   
            // this.Response.Headers.Add("Accepted Range", "12");
 
             if (setting.HasRange())
@@ -48,8 +47,10 @@ namespace Archi.Library.Controllers
                 query = await pagin.PagineAsync();
                 int total = _context.Set<TModel>().Count();
             }
+            
+            var result = Sort(query, param, Request.QueryString);
 
-            return await query.ToListAsync() ;
+            return await result.ToListAsync();
         }
 
         // GET: api/[Controller]/5
@@ -120,7 +121,6 @@ namespace Archi.Library.Controllers
         {
             return NotFound();
         }
-
         _context.Entry(controller).State = EntityState.Deleted;
         await _context.SaveChangesAsync();
 
@@ -131,5 +131,91 @@ namespace Archi.Library.Controllers
     {
         return _context.Set<TModel>().Any(e => e.ID == id);
     }
+    
+        protected IOrderedQueryable<TModel> Sort(IQueryable<TModel> query, Params param, QueryString queryString)
+        {
+            if (param.HasOrderby())
+            {
+                string champAsc = param.Asc;
+                string champDesc = param.Desc;
+                string[] queryOrderbyAsc = champAsc != null ? champAsc?.ToString().Split(',') : new string[0];
+                string[] queryOrderbyDesc = champDesc != null ? champDesc.ToString().Split(',') : new string[0];
+
+                if (param.isAsc(queryString) == true && champAsc != null)
+                {
+                    var lambda = CreateLambda<TModel>(queryOrderbyAsc.FirstOrDefault());
+                    var resultquery = query.OrderBy(lambda);
+
+                        foreach (string element in queryOrderbyAsc.Skip(1))
+                        {
+                            if (element != null)
+                            {
+                                var lambda2 = CreateLambda<TModel>(element);
+                                resultquery = resultquery.ThenBy(lambda2);
+                            }
+                        }
+
+                    if (champDesc == null)
+                    {
+                        return resultquery;
+                    }
+                    else
+                    {
+                        foreach (string element in queryOrderbyDesc)
+                        {
+                            if (element != null)
+                            {
+                                var lambda2 = CreateLambda<TModel>(element);
+                                resultquery = resultquery.ThenByDescending(lambda2);
+                            }
+                        }
+
+                        return resultquery;
+                    }
+                }
+                else /*if (param.isAsc(queryString) == false)*/
+                {
+                    var lambda = CreateLambda<TModel>(queryOrderbyDesc.FirstOrDefault());
+                    var resultquery = query.OrderByDescending(lambda);
+
+                    foreach (string element in queryOrderbyDesc.Skip(1))
+                    {
+                        if (element != null)
+                        {
+                            var lambda2 = CreateLambda<TModel>(element);
+                            resultquery = resultquery.ThenByDescending(lambda2);
+                        }
+                    }
+
+                    if (champAsc == null)
+                    {
+                        return resultquery;
+                    }
+                    else
+                    {
+                        foreach (string element in queryOrderbyAsc)
+                        {if (element != null)
+                            {
+                                var lambda2 = CreateLambda<TModel>(element);
+                                resultquery = resultquery.ThenBy(lambda2);
+                            }
+                        }
+
+                        return resultquery;
+                    }
+                }
+            }
+            return (IOrderedQueryable<TModel>)query;
+        }
+
+        private Expression<Func<TModel, object>> CreateLambda<Model>(string champ)
+        {
+            var parameter = Expression.Parameter(typeof(Model), "x");
+            var property = Expression.Property(parameter, champ);
+            var o = Expression.Convert(property, typeof(object));
+            var lambda = Expression.Lambda<Func<TModel, object>>(o, parameter);
+            return lambda;
+        }
+
     }
 }
