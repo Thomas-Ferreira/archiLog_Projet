@@ -35,8 +35,9 @@ namespace Archi.Library.Controllers
         public async Task<ActionResult<IEnumerable<TModel>>> GetAll([FromQuery]Params param, [FromQuery]Settings setting)
         {
             var query = _context.Set<TModel>().Where(x => x.Active == true);
-   
-           // this.Response.Headers.Add("Accepted Range", "12");
+            query = Sort(query, param, Request.QueryString);
+
+            // this.Response.Headers.Add("Accepted Range", "12");
 
             if (setting.HasRange())
             {
@@ -44,13 +45,13 @@ namespace Archi.Library.Controllers
                 var rel = setting.Rel;
               
                 var pagin = new PaginatedList<TModel>(query, int.Parse(tab[0]), int.Parse(tab[1]));
-                query = await pagin.PagineAsync();
+                var result = await pagin.PagineAsync();
                 int total = _context.Set<TModel>().Count();
-            }
-            
-            var result = Sort(query, param, Request.QueryString);
 
-            return await result.ToListAsync();
+                return await result.ToListAsync();
+            }
+
+            return await query.ToListAsync();
         }
 
         // GET: api/[Controller]/5
