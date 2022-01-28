@@ -55,22 +55,43 @@ namespace Archi.Library.Controllers
 
         // GET: api/[Controller]/5
         [HttpGet("{id}")]
-    public async Task<ActionResult<TModel>> GetById(int id)
-    {
-    var controller = await _context.Set<TModel>().SingleOrDefaultAsync(x => x.ID==id && x.Active);
+            public async Task<ActionResult<TModel>> GetById(int id)
+            {
+             var controller = await _context.Set<TModel>().SingleOrDefaultAsync(x => x.ID==id && x.Active);
 
-    if (controller == null)
-    {
-        return NotFound();
-    }
+                if (controller == null)
+                {
+                return NotFound();
+                }
 
-    return controller;
-    }
+            return controller;
+        }
+        [HttpGet("search")]
+            public async Task<ActionResult<IEnumerable<TModel>>> SearchingName()
+            {
 
-    // POST: api/[Controller]
-    // To protect from overposting attacks, enable the specific properties you want to bind to, for
-    // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-    [HttpPost]
+                // on récupère la clé de notre paramètre
+                var Propertykey = Request.Query.First().Key;
+                // on récupère la valeur de notre proprité
+                var valueProperty = Request.Query.First().Value.ToString();
+
+                // creation de notre expression Lambda 
+                var parameter = Expression.Parameter(typeof(TModel), "x");
+                var property = Expression.Property(parameter, Propertykey);
+                var constanteProperty = Expression.Constant(valueProperty, typeof(string));
+                BinaryExpression binaryExpression = Expression.Equal(property, constanteProperty);
+                var Lambda = Expression.Lambda<Func<TModel, bool>>(binaryExpression, parameter);
+
+                // resultat retouné 
+                var result = await _context.Set<TModel>().Where(Lambda).ToListAsync();
+                return result;
+        }
+
+
+        // POST: api/[Controller]
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPost]
     public async Task<ActionResult<TModel>> PostController(TModel model)
     {
         _context.Set<TModel>().Add(model);
