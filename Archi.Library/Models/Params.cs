@@ -16,11 +16,21 @@ namespace Archi.Library.Models
 
         public bool isAsc(QueryString queryString)
         {
+            if (queryString.ToString().IndexOf("asc", 0) == -1)
+            {
+                return false;
+            }
+            if (queryString.ToString().IndexOf("desc", 0) == -1)
+            {
+                return true;
+            }
             if (queryString.ToString().IndexOf("asc", 0) < queryString.ToString().IndexOf("desc", 0))
             {
                 return true;
             }
+
             return false;
+           
         }
     }
 }

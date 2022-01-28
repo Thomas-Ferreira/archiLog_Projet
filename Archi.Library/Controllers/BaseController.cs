@@ -122,15 +122,18 @@ namespace Archi.Library.Controllers
                 string[] queryOrderbyAsc = champAsc != null ? champAsc?.ToString().Split(',') : new string[0];
                 string[] queryOrderbyDesc = champDesc != null ? champDesc.ToString().Split(',') : new string[0];
 
-                if (param.isAsc(queryString) == true)
+                if (param.isAsc(queryString) == true && champAsc != null)
                 {
                     var lambda = CreateLambda<TModel>(queryOrderbyAsc.FirstOrDefault());
                     var resultquery = query.OrderBy(lambda);
 
                         foreach (string element in queryOrderbyAsc.Skip(1))
                         {
-                            var lambda2 = CreateLambda<TModel>(element);
-                            resultquery = resultquery.ThenBy(lambda2);
+                            if (element != null)
+                            {
+                                var lambda2 = CreateLambda<TModel>(element);
+                                resultquery = resultquery.ThenBy(lambda2);
+                            }
                         }
 
                     if (champDesc == null)
@@ -141,22 +144,28 @@ namespace Archi.Library.Controllers
                     {
                         foreach (string element in queryOrderbyDesc)
                         {
-                            var lambda2 = CreateLambda<TModel>(element);
-                            resultquery = resultquery.ThenByDescending(lambda2);
+                            if (element != null)
+                            {
+                                var lambda2 = CreateLambda<TModel>(element);
+                                resultquery = resultquery.ThenByDescending(lambda2);
+                            }
                         }
 
                         return resultquery;
                     }
                 }
-                else if (param.isAsc(queryString) == false)
+                else /*if (param.isAsc(queryString) == false)*/
                 {
                     var lambda = CreateLambda<TModel>(queryOrderbyDesc.FirstOrDefault());
                     var resultquery = query.OrderByDescending(lambda);
 
                     foreach (string element in queryOrderbyDesc.Skip(1))
                     {
-                        var lambda2 = CreateLambda<TModel>(element);
-                        resultquery = resultquery.ThenByDescending(lambda2);
+                        if (element != null)
+                        {
+                            var lambda2 = CreateLambda<TModel>(element);
+                            resultquery = resultquery.ThenByDescending(lambda2);
+                        }
                     }
 
                     if (champAsc == null)
@@ -166,9 +175,11 @@ namespace Archi.Library.Controllers
                     else
                     {
                         foreach (string element in queryOrderbyAsc)
-                        {
-                            var lambda2 = CreateLambda<TModel>(element);
-                            resultquery = resultquery.ThenBy(lambda2);
+                        {if (element != null)
+                            {
+                                var lambda2 = CreateLambda<TModel>(element);
+                                resultquery = resultquery.ThenBy(lambda2);
+                            }
                         }
 
                         return resultquery;
