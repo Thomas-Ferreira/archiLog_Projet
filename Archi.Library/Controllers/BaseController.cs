@@ -20,7 +20,7 @@ namespace Archi.Library.Controllers
     {
         protected readonly TContext _context;
 
-        public BaseController(TContext context, IConfiguration config)
+        public BaseController(TContext context)
         {
             _context = context;
           

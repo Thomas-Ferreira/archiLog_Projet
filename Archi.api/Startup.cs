@@ -12,7 +12,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Archi.api.Data;
 using Microsoft.EntityFrameworkCore;
-using Archi.Library.Core;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 

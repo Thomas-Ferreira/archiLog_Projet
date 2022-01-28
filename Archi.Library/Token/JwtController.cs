@@ -6,12 +6,12 @@ using System.Text;
 namespace Archi.Library.Token
 {
     [ApiController]
-    [Route("api/[Controller]")]
+    //[Route("api/[Controller]")]
     public class JwtController : ControllerBase
     {
         [HttpGet]
-        [Route("{login}/{password}")]
-        public ActionResult<string> GetJwt(string login, string password)
+       [Route("connect")] 
+        public ActionResult<string> Connect(string login, string password)
         {
             if (password == "archilog")
             {
