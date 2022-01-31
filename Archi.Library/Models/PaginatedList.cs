@@ -8,8 +8,7 @@ using System.Web.Http.Routing;
 public class PaginatedList<TPagin>
 {
     private int _pageIndex;
-    public int TotalPages { get; set; }
-    //const int maxPageSize = 3; 
+    public int TotalPages { get; set; } 
     private int _pageSize;
     private readonly IQueryable<TPagin> _items;
 

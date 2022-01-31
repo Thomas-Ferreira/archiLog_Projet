@@ -1,0 +1,11 @@
+FERREIRA Thomas : -fonctinalité tri
+		  -versionning
+		  -mise en place des Logs
+
+ANGELICA Julien : -Pagination
+		  -Authentification OAuth2/OpenID
+		  -Filtres
+		  -configuration base Azure
+
+LE BRIS Pierre : -Filtres
+		 -swagger.ui

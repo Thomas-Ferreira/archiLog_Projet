@@ -67,26 +67,6 @@ namespace Archi.Library.Controllers
 
             return controller;
         }
-        [HttpGet("search")]
-            public async Task<ActionResult<IEnumerable<TModel>>> SearchingName()
-            {
-                //Récupération de la key des paramètres 
-                var Propertykey = Request.Query.First().Key;
-                //Récupération de la valeur de notre propriété
-                var valueProperty = Request.Query.First().Value.ToString();
-
-                //Création de la lambda                 vv Utilisation de la reflection
-                var parameter = Expression.Parameter(typeof(TModel), "x");
-                var property = Expression.Property(parameter, Propertykey);
-                var constanteProperty = Expression.Constant(valueProperty, typeof(string));
-                BinaryExpression binaryExpression = Expression.Equal(property, constanteProperty);
-                var Lambda = Expression.Lambda<Func<TModel, bool>>(binaryExpression, parameter);
-
-                //Resultat
-                var result = await _context.Set<TModel>().Where(Lambda).ToListAsync();
-                return result;
-            }
-
 
         // POST: api/[Controller]
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
